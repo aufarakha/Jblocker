@@ -1,0 +1,453 @@
+<html>
+  <head>
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link
+      rel="stylesheet"
+      as="style"
+      onload="this.rel='stylesheet'"
+      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900&amp;family=Space+Grotesk%3Awght%40400%3B500%3B700"
+    />
+
+    <title>Stitch Design</title>
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  </head>
+  <body>
+    <div class="relative flex size-full min-h-screen flex-col bg-[#111418] dark group/design-root overflow-x-hidden" style='font-family: "Space Grotesk", "Noto Sans", sans-serif;'>
+      <div class="layout-container flex h-full grow flex-col">
+        <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#293038] px-10 py-3">
+          <div class="flex items-center gap-4 text-white">
+            <div class="size-4">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M44 4H30.6666V17.3334H17.3334V30.6666H4V44H44V4Z" fill="currentColor"></path></svg>
+            </div>
+            <h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Jblocker</h2>
+          </div>
+          <div class="flex flex-1 justify-end gap-8">
+            <div class="flex items-center gap-9">
+              <a class="text-white text-sm font-medium leading-normal" href="{{ url_for('index') }}">Dashboard</a>
+              <a class="text-white text-sm font-medium leading-normal" href="{{ url_for('details') }}">Reports</a>
+              <a class="text-white text-sm font-medium leading-normal" href="{{ url_for('settings') }}">Settings</a>
+              <a class="text-white text-sm font-medium leading-normal" href="#" onclick="toggleMonitoring()">Toggle Monitor</a>
+            </div>
+            <button
+              class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-[#293038] text-white gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5"
+            >
+              <div class="text-white" data-icon="Bell" data-size="20px" data-weight="regular">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor" viewBox="0 0 256 256">
+                  <path
+                    d="M221.8,175.94C216.25,166.38,208,139.33,208,104a80,80,0,1,0-160,0c0,35.34-8.26,62.38-13.81,71.94A16,16,0,0,0,48,200H88.81a40,40,0,0,0,78.38,0H208a16,16,0,0,0,13.8-24.06ZM128,216a24,24,0,0,1-22.62-16h45.24A24,24,0,0,1,128,216ZM48,184c7.7-13.24,16-43.92,16-80a64,64,0,1,1,128,0c0,36.05,8.28,66.73,16,80Z"
+                  ></path>
+                </svg>
+              </div>
+            </button>
+            <div
+              class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
+              style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAPiAvEizFAct80uoi5nDmZpx6-6a5l7huXzjzTf6IFSbpybRL-eGeJygqy9HFuQeDGO2S47qJ8PxCyq6Bll0-eKkSqHZXdpq_vxNYgb6RvI7qCOVaMZOomDvC-beWv-qv7bPL95YjHjmpaOpZNifthBxXmgiyaFWX44reySypERu7cugCi9bIgQMtD-XCDzw0zSFOLeDZyG7GHp_ySUes4DppvGlpupgAqkR-1XWtVkGhtmqn4BJyHKdreaS1K-oHx-Pl-tmVESWc");'
+            ></div>
+          </div>
+        </header>
+        <div class="px-40 flex flex-1 justify-center py-5">
+          <div class="layout-content-container flex flex-col max-w-[960px] flex-1">
+            <div class="flex flex-wrap justify-between gap-3 p-4"><p class="text-white tracking-light text-[32px] font-bold leading-tight min-w-72">Network Activity</p></div>
+            <div class="flex flex-wrap gap-4 p-4">
+              <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-lg p-6 bg-[#293038]">
+                <p class="text-white text-base font-medium leading-normal">Current Status</p>
+                <p class="text-white tracking-light text-2xl font-bold leading-tight">{{ stats.status }}</p>
+                <p class="text-[#0bda5e] text-base font-medium leading-normal" id="status-indicator">
+                  {% if stats.monitoring_enabled %}Active{% else %}Inactive{% endif %}
+                </p>
+              </div>
+              <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-lg p-6 bg-[#293038]">
+                <p class="text-white text-base font-medium leading-normal">Total Connections</p>
+                <p class="text-white tracking-light text-2xl font-bold leading-tight" data-stat="total_connections">{{ stats.total_connections }}</p>
+                <p class="text-[#9daab8] text-base font-medium leading-normal">Monitored</p>
+              </div>
+              <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-lg p-6 bg-[#293038]">
+                <p class="text-white text-base font-medium leading-normal">Blocked Websites</p>
+                <p class="text-white tracking-light text-2xl font-bold leading-tight" data-stat="blocked_sites">{{ stats.blocked_sites }}</p>
+                <p class="text-[#fa6238] text-base font-medium leading-normal">Gambling Sites</p>
+              </div>
+            </div>
+            <h2 class="text-white text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Real-time Traffic</h2>
+            <div class="flex flex-wrap gap-4 px-4 py-6">
+              <div class="flex min-w-72 flex-1 flex-col gap-2 rounded-lg border border-[#3c4753] p-6">
+                <p class="text-white text-base font-medium leading-normal">Bandwidth Usage</p>
+                <p class="text-white tracking-light text-[32px] font-bold leading-tight truncate" id="bandwidth-usage">
+                  {{ stats.bandwidth_mbps or 0 }} Mbps
+                </p>
+                <div class="flex gap-1">
+                  <p class="text-[#9daab8] text-base font-normal leading-normal">Last 24 Hours</p>
+                  <p class="text-[#0bda5e] text-base font-medium leading-normal">+5%</p>
+                </div>
+                <div class="flex min-h-[180px] flex-1 flex-col gap-4 py-4">
+                  <canvas id="bandwidth-chart" width="400" height="148" class="w-full"></canvas>
+                  <div class="flex justify-around" id="bandwidth-time-labels">
+                    <!-- Time labels will be populated dynamically -->
+                  </div>
+                </div>
+              </div>
+              <div class="flex min-w-72 flex-1 flex-col gap-2 rounded-lg border border-[#3c4753] p-6">
+                <p class="text-white text-base font-medium leading-normal">Connection Attempts</p>
+                <p class="text-white tracking-light text-[32px] font-bold leading-tight truncate" id="connection-attempts">
+                  {{ stats.connection_attempts or 0 }}
+                </p>
+                <div class="flex gap-1">
+                  <p class="text-[#9daab8] text-base font-normal leading-normal">Last Hour</p>
+                  <p class="text-[#fa6238] text-base font-medium leading-normal">-2%</p>
+                </div>
+                <div class="flex min-h-[180px] flex-col gap-4 py-4">
+                  <canvas id="connections-chart" width="400" height="148" class="w-full"></canvas>
+                  <div class="flex justify-around" id="connections-time-labels">
+                    <!-- Time labels will be populated dynamically -->
+                  </div>
+                </div>
+              </div>
+            </div>
+            <h2 class="text-white text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Flagged Content</h2>
+            <div class="px-4 py-3 @container">
+              <div class="flex overflow-hidden rounded-lg border border-[#3c4753] bg-[#111418]">
+                <table class="flex-1">
+                  <thead>
+                    <tr class="bg-[#1c2126]">
+                      <th class="table-367ebd99-8e5a-4c1d-a426-c06e72111df7-column-120 px-4 py-3 text-left text-white w-[400px] text-sm font-medium leading-normal">Website</th>
+                      <th class="table-367ebd99-8e5a-4c1d-a426-c06e72111df7-column-240 px-4 py-3 text-left text-white w-[400px] text-sm font-medium leading-normal">Category</th>
+                      <th class="table-367ebd99-8e5a-4c1d-a426-c06e72111df7-column-360 px-4 py-3 text-left text-white w-60 text-sm font-medium leading-normal">Risk Level</th>
+                      <th class="table-367ebd99-8e5a-4c1d-a426-c06e72111df7-column-480 px-4 py-3 text-left text-white w-60 text-[#9daab8] text-sm font-medium leading-normal">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for detection in recent_detections %}
+                    <tr class="border-t border-t-[#3c4753]">
+                      <td class="table-367ebd99-8e5a-4c1d-a426-c06e72111df7-column-120 h-[72px] px-4 py-2 w-[400px] text-white text-sm font-normal leading-normal">
+                        {{ detection.url[:50] }}{% if detection.url|length > 50 %}...{% endif %}
+                      </td>
+                      <td class="table-367ebd99-8e5a-4c1d-a426-c06e72111df7-column-240 h-[72px] px-4 py-2 w-[400px] text-[#9daab8] text-sm font-normal leading-normal">
+                        {% if detection.is_gambling %}Gambling{% else %}Safe{% endif %}
+                      </td>
+                      <td class="table-367ebd99-8e5a-4c1d-a426-c06e72111df7-column-360 h-[72px] px-4 py-2 w-60 text-sm font-normal leading-normal">
+                        <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-8 px-4 
+                          {% if detection.confidence > 0.8 %}bg-red-600{% elif detection.confidence > 0.5 %}bg-yellow-600{% else %}bg-green-600{% endif %} 
+                          text-white text-sm font-medium leading-normal w-full">
+                          <span class="truncate">
+                            {% if detection.confidence > 0.8 %}High ({{ "%.0f"|format(detection.confidence * 100) }}%)
+                            {% elif detection.confidence > 0.5 %}Medium ({{ "%.0f"|format(detection.confidence * 100) }}%)
+                            {% else %}Low ({{ "%.0f"|format(detection.confidence * 100) }}%){% endif %}
+                          </span>
+                        </button>
+                      </td>
+                      <td class="table-367ebd99-8e5a-4c1d-a426-c06e72111df7-column-480 h-[72px] px-4 py-2 w-60 text-[#9daab8] text-sm font-bold leading-normal tracking-[0.015em]">
+                        <a href="{{ url_for('details') }}">View Details</a>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not recent_detections %}
+                    <tr class="border-t border-t-[#3c4753]">
+                      <td colspan="4" class="h-[72px] px-4 py-2 text-center text-[#9daab8] text-sm font-normal leading-normal">
+                        No recent detections
+                      </td>
+                    </tr>
+                    {% endif %}
+                  </tbody>
+                </table>
+              </div>
+              <style>
+                          @container(max-width:120px){.table-367ebd99-8e5a-4c1d-a426-c06e72111df7-column-120{display: none;}}
+                @container(max-width:240px){.table-367ebd99-8e5a-4c1d-a426-c06e72111df7-column-240{display: none;}}
+                @container(max-width:360px){.table-367ebd99-8e5a-4c1d-a426-c06e72111df7-column-360{display: none;}}
+                @container(max-width:480px){.table-367ebd99-8e5a-4c1d-a426-c06e72111df7-column-480{display: none;}}
+              </style>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      // Chart data storage
+      let bandwidthData = [];
+      let connectionsData = [];
+      
+      // Chart drawing functions
+      function drawBandwidthChart(canvas, data) {
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        
+        // Clear canvas
+        ctx.clearRect(0, 0, width, height);
+        
+        if (!data || data.length === 0) {
+          // Draw placeholder message
+          ctx.fillStyle = '#9daab8';
+          ctx.font = '14px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('No data available', width / 2, height / 2);
+          return;
+        }
+        
+        // Find max value for scaling
+        const maxValue = Math.max(...data.map(d => d.bandwidth_mbps || 0));
+        const padding = 20;
+        const chartWidth = width - padding * 2;
+        const chartHeight = height - padding * 2;
+        
+        // Create gradient
+        const gradient = ctx.createLinearGradient(0, 0, 0, height);
+        gradient.addColorStop(0, 'rgba(41, 48, 56, 0.8)');
+        gradient.addColorStop(1, 'rgba(41, 48, 56, 0.1)');
+        
+        // Draw area chart
+        ctx.beginPath();
+        ctx.moveTo(padding, height - padding);
+        
+        data.forEach((point, index) => {
+          const x = padding + (index / (data.length - 1)) * chartWidth;
+          const y = height - padding - ((point.bandwidth_mbps || 0) / maxValue) * chartHeight;
+          
+          if (index === 0) {
+            ctx.lineTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        });
+        
+        ctx.lineTo(width - padding, height - padding);
+        ctx.closePath();
+        ctx.fillStyle = gradient;
+        ctx.fill();
+        
+        // Draw line
+        ctx.beginPath();
+        data.forEach((point, index) => {
+          const x = padding + (index / (data.length - 1)) * chartWidth;
+          const y = height - padding - ((point.bandwidth_mbps || 0) / maxValue) * chartHeight;
+          
+          if (index === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        });
+        
+        ctx.strokeStyle = '#9daab8';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Draw points
+        data.forEach((point, index) => {
+          const x = padding + (index / (data.length - 1)) * chartWidth;
+          const y = height - padding - ((point.bandwidth_mbps || 0) / maxValue) * chartHeight;
+          
+          ctx.beginPath();
+          ctx.arc(x, y, 3, 0, 2 * Math.PI);
+          ctx.fillStyle = '#0bda5e';
+          ctx.fill();
+        });
+      }
+      
+      function drawConnectionsChart(canvas, data) {
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        
+        // Clear canvas
+        ctx.clearRect(0, 0, width, height);
+        
+        if (!data || data.length === 0) {
+          // Draw placeholder message
+          ctx.fillStyle = '#9daab8';
+          ctx.font = '14px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('No data available', width / 2, height / 2);
+          return;
+        }
+        
+        // Find max value for scaling
+        const maxValue = Math.max(...data.map(d => d.active_connections || 0));
+        const padding = 20;
+        const chartWidth = width - padding * 2;
+        const chartHeight = height - padding * 2;
+        const barWidth = chartWidth / data.length;
+        
+        // Draw bars
+        data.forEach((point, index) => {
+          const barHeight = ((point.active_connections || 0) / maxValue) * chartHeight;
+          const x = padding + index * barWidth;
+          const y = height - padding - barHeight;
+          
+          // Draw bar
+          ctx.fillStyle = '#293038';
+          ctx.fillRect(x + 2, y, barWidth - 4, barHeight);
+          
+          // Draw bar border
+          ctx.strokeStyle = '#9daab8';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(x + 2, y, barWidth - 4, 2);
+        });
+      }
+      
+      function updateTimeLabels(containerId, data, format = 'HH:MM') {
+        const container = document.getElementById(containerId);
+        if (!container || !data || data.length === 0) return;
+        
+        container.innerHTML = '';
+        
+        // Show labels for every few data points to avoid crowding
+        const labelInterval = Math.max(1, Math.floor(data.length / 6));
+        
+        data.forEach((point, index) => {
+          if (index % labelInterval === 0 || index === data.length - 1) {
+            const label = document.createElement('p');
+            label.className = 'text-[#9daab8] text-[13px] font-bold leading-normal tracking-[0.015em]';
+            
+            if (point.hour) {
+              label.textContent = point.hour;
+            } else if (point.timestamp) {
+              const date = new Date(point.timestamp);
+              label.textContent = date.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+              });
+            } else {
+              label.textContent = `${index}h`;
+            }
+            
+            container.appendChild(label);
+          }
+        });
+      }
+      
+      function loadBandwidthHistory() {
+        fetch('/api/bandwidth_history?hours=24')
+          .then(response => response.json())
+          .then(data => {
+            if (data.bandwidth_history) {
+              bandwidthData = data.bandwidth_history;
+              const canvas = document.getElementById('bandwidth-chart');
+              if (canvas) {
+                drawBandwidthChart(canvas, bandwidthData);
+                updateTimeLabels('bandwidth-time-labels', bandwidthData);
+              }
+            }
+          })
+          .catch(error => console.error('Error loading bandwidth history:', error));
+      }
+      
+      function loadConnectionsHistory() {
+        fetch('/api/connections_history?hours=12')
+          .then(response => response.json())
+          .then(data => {
+            if (data.connections_history) {
+              connectionsData = data.connections_history;
+              const canvas = document.getElementById('connections-chart');
+              if (canvas) {
+                drawConnectionsChart(canvas, connectionsData);
+                updateTimeLabels('connections-time-labels', connectionsData);
+              }
+            }
+          })
+          .catch(error => console.error('Error loading connections history:', error));
+      }
+      
+      // Auto-refresh stats every 5 seconds for real-time feel
+      setInterval(updateStats, 5000);
+      
+      // Refresh charts every 30 seconds
+      setInterval(() => {
+        loadBandwidthHistory();
+        loadConnectionsHistory();
+      }, 30000);
+      
+      function updateStats() {
+        fetch('/api/stats')
+          .then(response => response.json())
+          .then(data => {
+            if (!data.error) {
+              // Update stats on page
+              const totalConnectionsEl = document.querySelector('[data-stat="total_connections"]');
+              const blockedSitesEl = document.querySelector('[data-stat="blocked_sites"]');
+              
+              if (totalConnectionsEl) {
+                totalConnectionsEl.textContent = data.total_connections || data.total_detections || 0;
+              }
+              if (blockedSitesEl) {
+                blockedSitesEl.textContent = data.blocked_sites || data.blocked_count || 0;
+              }
+              
+              // Update real-time traffic stats
+              const bandwidthEl = document.getElementById('bandwidth-usage');
+              const connectionAttemptsEl = document.getElementById('connection-attempts');
+              
+              if (bandwidthEl && data.bandwidth_mbps !== undefined) {
+                bandwidthEl.textContent = `${data.bandwidth_mbps} Mbps`;
+              }
+              
+              if (connectionAttemptsEl && data.connection_attempts !== undefined) {
+                connectionAttemptsEl.textContent = data.connection_attempts;
+              }
+              
+              // Update status indicator
+              const statusIndicator = document.getElementById('status-indicator');
+              if (data.monitoring_active) {
+                statusIndicator.textContent = 'Active';
+                statusIndicator.className = 'text-[#0bda5e] text-base font-medium leading-normal';
+              } else {
+                statusIndicator.textContent = 'Inactive';
+                statusIndicator.className = 'text-[#fa6238] text-base font-medium leading-normal';
+              }
+            }
+          })
+          .catch(error => console.error('Error updating stats:', error));
+      }
+      
+      function toggleMonitoring() {
+        const currentStatus = document.getElementById('status-indicator').textContent === 'Active';
+        
+        fetch('/api/toggle_monitoring', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ enable: !currentStatus })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            updateStats();
+            alert(data.monitoring_active ? 'Monitoring started' : 'Monitoring stopped');
+          } else {
+            alert('Error toggling monitoring');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Error toggling monitoring');
+        });
+      }
+      
+      // Add smooth animations and initialize charts
+      document.addEventListener('DOMContentLoaded', function() {
+        // Animate cards on load
+        const cards = document.querySelectorAll('.flex.min-w-\\[158px\\]');
+        cards.forEach((card, index) => {
+          card.style.opacity = '0';
+          card.style.transform = 'translateY(20px)';
+          setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+          }, index * 100);
+        });
+        
+        // Load initial chart data
+        setTimeout(() => {
+          loadBandwidthHistory();
+          loadConnectionsHistory();
+        }, 500);
+      });
+    </script>
+  </body>
+</html>

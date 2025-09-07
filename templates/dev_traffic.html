@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link
+      rel="stylesheet"
+      as="style"
+      onload="this.rel='stylesheet'"
+      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900&amp;family=Space+Grotesk%3Awght%40400%3B500%3B700"
+    />
+
+    <title>NetGuard - Developer Traffic</title>
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  </head>
+  <body>
+    <div
+      class="relative flex size-full min-h-screen flex-col bg-[#111418] dark group/design-root overflow-x-hidden"
+      style="font-family: 'Space Grotesk', 'Noto Sans', sans-serif"
+    >
+      <div class="layout-container flex h-full grow flex-col">
+        <header
+          class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#293038] px-10 py-3"
+        >
+          <div class="flex items-center gap-8">
+            <div class="flex items-center gap-4 text-white">
+              <div class="size-4">
+                <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M44 4H30.6666V17.3334H17.3334V30.6666H4V44H44V4Z" fill="currentColor"></path>
+                </svg>
+              </div>
+              <h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em]">
+                NetGuard - Developer Mode
+              </h2>
+            </div>
+            <div class="flex items-center gap-9">
+              <a class="text-white text-sm font-medium leading-normal" href="{{ url_for('index') }}">Dashboard</a>
+              <a class="text-white text-sm font-medium leading-normal" href="{{ url_for('details') }}">Reports</a>
+              <a class="text-[#0bda5e] text-sm font-medium leading-normal" href="{{ url_for('dev_traffic') }}">Dev Traffic</a>
+              <a class="text-white text-sm font-medium leading-normal" href="{{ url_for('settings') }}">Settings</a>
+            </div>
+          </div>
+          <div class="flex flex-1 justify-end gap-8">
+            <button onclick="refreshTraffic()" 
+              class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-[#293038] text-white gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
+              <span>Refresh</span>
+            </button>
+          </div>
+        </header>
+        
+        <div class="px-40 flex flex-1 justify-center py-5">
+          <div class="layout-content-container flex flex-col max-w-[1200px] flex-1">
+            <div class="flex flex-wrap justify-between gap-3 p-4">
+              <div class="flex min-w-72 flex-col gap-3">
+                <p class="text-white tracking-light text-[32px] font-bold leading-tight">
+                  Network Traffic Analysis
+                </p>
+                <p class="text-[#9daab8] text-sm font-normal leading-normal">
+                  Detailed HTTP/HTTPS traffic logs with headers, requests, and responses.
+                </p>
+              </div>
+            </div>
+            
+            <!-- Time filter -->
+            <div class="flex gap-3 p-3 flex-wrap pr-4">
+              <select onchange="filterByTime(this.value)" 
+                class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-[#293038] pl-4 pr-2 text-white text-sm font-medium leading-normal">
+                <option value="1" {% if hours == 1 %}selected{% endif %}>Last Hour</option>
+                <option value="6" {% if hours == 6 %}selected{% endif %}>Last 6 Hours</option>
+                <option value="24" {% if hours == 24 %}selected{% endif %}>Last 24 Hours</option>
+                <option value="168" {% if hours == 168 %}selected{% endif %}>Last Week</option>
+              </select>
+              
+              <button onclick="exportTrafficData()" 
+                class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-[#293038] pl-4 pr-2 text-white text-sm font-medium leading-normal">
+                Export Data
+              </button>
+            </div>
+
+            <!-- Traffic logs table -->
+            <div class="px-4 py-3 @container">
+              <div class="flex overflow-hidden rounded-lg border border-[#3c4753] bg-[#111418]">
+                <table class="flex-1">
+                  <thead>
+                    <tr class="bg-[#1c2126]">
+                      <th class="px-4 py-3 text-left text-white text-sm font-medium leading-normal">Timestamp</th>
+                      <th class="px-4 py-3 text-left text-white text-sm font-medium leading-normal">Method</th>
+                      <th class="px-4 py-3 text-left text-white text-sm font-medium leading-normal">URL</th>
+                      <th class="px-4 py-3 text-left text-white text-sm font-medium leading-normal">Status</th>
+                      <th class="px-4 py-3 text-left text-white text-sm font-medium leading-normal">Size</th>
+                      <th class="px-4 py-3 text-left text-white text-sm font-medium leading-normal">Duration</th>
+                      <th class="px-4 py-3 text-left text-white text-sm font-medium leading-normal">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="traffic-table-body">
+                    {% for log in traffic_logs %}
+                    <tr class="border-t border-t-[#3c4753] traffic-row" data-log-id="{{ log.id }}">
+                      <td class="h-[60px] px-4 py-2 text-[#9daab8] text-sm font-normal leading-normal">
+                        {{ log.timestamp[:19] if log.timestamp else 'N/A' }}
+                      </td>
+                      <td class="h-[60px] px-4 py-2 text-white text-sm font-normal leading-normal">
+                        <span class="px-2 py-1 rounded text-xs 
+                          {% if log.method == 'GET' %}bg-green-600
+                          {% elif log.method == 'POST' %}bg-blue-600
+                          {% elif log.method == 'PUT' %}bg-yellow-600
+                          {% elif log.method == 'DELETE' %}bg-red-600
+                          {% else %}bg-gray-600{% endif %}">
+                          {{ log.method or 'N/A' }}
+                        </span>
+                      </td>
+                      <td class="h-[60px] px-4 py-2 text-[#9daab8] text-sm font-normal leading-normal">
+                        <div class="truncate max-w-[300px]" title="{{ log.url }}">
+                          {{ log.url[:50] if log.url else 'N/A' }}{% if log.url and log.url|length > 50 %}...{% endif %}
+                        </div>
+                      </td>
+                      <td class="h-[60px] px-4 py-2 text-sm font-normal leading-normal">
+                        {% if log.status_code %}
+                        <span class="px-2 py-1 rounded text-xs
+                          {% if log.status_code < 300 %}bg-green-600 text-white
+                          {% elif log.status_code < 400 %}bg-yellow-600 text-white
+                          {% elif log.status_code < 500 %}bg-orange-600 text-white
+                          {% else %}bg-red-600 text-white{% endif %}">
+                          {{ log.status_code }}
+                        </span>
+                        {% else %}
+                        <span class="text-[#9daab8]">N/A</span>
+                        {% endif %}
+                      </td>
+                      <td class="h-[60px] px-4 py-2 text-[#9daab8] text-sm font-normal leading-normal">
+                        {% if log.response_size %}
+                          {% if log.response_size > 1024*1024 %}
+                            {{ "%.1f"|format(log.response_size / (1024*1024)) }} MB
+                          {% elif log.response_size > 1024 %}
+                            {{ "%.1f"|format(log.response_size / 1024) }} KB
+                          {% else %}
+                            {{ log.response_size }} B
+                          {% endif %}
+                        {% else %}
+                          N/A
+                        {% endif %}
+                      </td>
+                      <td class="h-[60px] px-4 py-2 text-[#9daab8] text-sm font-normal leading-normal">
+                        {% if log.duration_ms %}
+                          {{ "%.0f"|format(log.duration_ms) }}ms
+                        {% else %}
+                          N/A
+                        {% endif %}
+                      </td>
+                      <td class="h-[60px] px-4 py-2 text-[#9daab8] text-sm font-bold leading-normal tracking-[0.015em]">
+                        <button onclick="showTrafficDetails({{ log.id }})" 
+                          class="text-blue-400 hover:text-blue-300">Details</button>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not traffic_logs %}
+                    <tr class="border-t border-t-[#3c4753]">
+                      <td colspan="7" class="h-[72px] px-4 py-2 text-center text-[#9daab8] text-sm font-normal leading-normal">
+                        No traffic logs found. Make sure dev mode is enabled and proxy is configured.
+                      </td>
+                    </tr>
+                    {% endif %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Traffic Details Modal -->
+    <div id="traffic-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+      <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-[#1c2126] rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-white text-xl font-bold">Traffic Details</h3>
+              <button onclick="closeTrafficModal()" class="text-[#9daab8] hover:text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+            <div id="traffic-details-content" class="text-white">
+              <!-- Details will be loaded here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function filterByTime(hours) {
+        window.location.href = `{{ url_for('dev_traffic') }}?hours=${hours}`;
+      }
+      
+      function refreshTraffic() {
+        location.reload();
+      }
+      
+      function exportTrafficData() {
+        fetch('/api/traffic_logs?hours={{ hours }}&limit=1000')
+          .then(response => response.json())
+          .then(data => {
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `traffic_logs_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          })
+          .catch(error => {
+            console.error('Error exporting data:', error);
+            alert('Error exporting traffic data');
+          });
+      }
+      
+      function showTrafficDetails(logId) {
+        // For now, show a placeholder. In a real implementation, 
+        // you'd fetch detailed log data from the server
+        const modal = document.getElementById('traffic-modal');
+        const content = document.getElementById('traffic-details-content');
+        
+        content.innerHTML = `
+          <div class="space-y-4">
+            <div>
+              <h4 class="text-lg font-semibold mb-2">Request Headers</h4>
+              <pre class="bg-[#293038] p-3 rounded text-sm overflow-x-auto">Loading...</pre>
+            </div>
+            <div>
+              <h4 class="text-lg font-semibold mb-2">Response Headers</h4>
+              <pre class="bg-[#293038] p-3 rounded text-sm overflow-x-auto">Loading...</pre>
+            </div>
+            <div>
+              <h4 class="text-lg font-semibold mb-2">Request Body</h4>
+              <pre class="bg-[#293038] p-3 rounded text-sm overflow-x-auto max-h-40">Loading...</pre>
+            </div>
+            <div>
+              <h4 class="text-lg font-semibold mb-2">Response Body</h4>
+              <pre class="bg-[#293038] p-3 rounded text-sm overflow-x-auto max-h-40">Loading...</pre>
+            </div>
+          </div>
+        `;
+        
+        modal.classList.remove('hidden');
+        
+        // Fetch actual details
+        fetch(`/api/traffic_logs?limit=1000`)
+          .then(response => response.json())
+          .then(data => {
+            const log = data.traffic_logs.find(l => l.id === logId);
+            if (log) {
+              content.innerHTML = `
+                <div class="space-y-4">
+                  <div>
+                    <h4 class="text-lg font-semibold mb-2">Request Info</h4>
+                    <div class="bg-[#293038] p-3 rounded text-sm">
+                      <p><strong>URL:</strong> ${log.url || 'N/A'}</p>
+                      <p><strong>Method:</strong> ${log.method || 'N/A'}</p>
+                      <p><strong>Source:</strong> ${log.source_ip}:${log.source_port}</p>
+                      <p><strong>Destination:</strong> ${log.dest_ip}:${log.dest_port}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 class="text-lg font-semibold mb-2">Request Headers</h4>
+                    <pre class="bg-[#293038] p-3 rounded text-sm overflow-x-auto">${JSON.stringify(log.headers || {}, null, 2)}</pre>
+                  </div>
+                  <div>
+                    <h4 class="text-lg font-semibold mb-2">Response Headers</h4>
+                    <pre class="bg-[#293038] p-3 rounded text-sm overflow-x-auto">${JSON.stringify(log.response_headers || {}, null, 2)}</pre>
+                  </div>
+                  <div>
+                    <h4 class="text-lg font-semibold mb-2">Request Body</h4>
+                    <pre class="bg-[#293038] p-3 rounded text-sm overflow-x-auto max-h-40">${log.request_body || 'No request body'}</pre>
+                  </div>
+                  <div>
+                    <h4 class="text-lg font-semibold mb-2">Response Body</h4>
+                    <pre class="bg-[#293038] p-3 rounded text-sm overflow-x-auto max-h-40">${log.response_body || 'No response body'}</pre>
+                  </div>
+                </div>
+              `;
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching details:', error);
+          });
+      }
+      
+      function closeTrafficModal() {
+        document.getElementById('traffic-modal').classList.add('hidden');
+      }
+      
+      // Auto-refresh every 30 seconds
+      setInterval(refreshTraffic, 30000);
+      
+      // Add fade-in animation for table rows
+      document.addEventListener('DOMContentLoaded', function() {
+        const rows = document.querySelectorAll('.traffic-row');
+        rows.forEach((row, index) => {
+          row.style.opacity = '0';
+          row.style.transform = 'translateY(10px)';
+          setTimeout(() => {
+            row.style.transition = 'all 0.3s ease';
+            row.style.opacity = '1';
+            row.style.transform = 'translateY(0)';
+          }, index * 50);
+        });
+      });
+    </script>
+  </body>
+</html>
