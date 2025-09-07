@@ -1,6 +1,6 @@
-# NetGuard - Network Traffic Monitor & Gambling Blocker
+# Jblocker - Network Traffic Monitor & Gambling Blocker
 
-NetGuard is a Flask-based network monitoring application that uses machine learning to detect and block gambling websites (judol) in real-time. It monitors network traffic, analyzes HTTP/HTTPS requests, and automatically blocks suspicious gambling-related content.
+Jblocker is a Flask-based network monitoring application that uses machine learning to detect and block gambling websites (judol) in real-time. It monitors network traffic, analyzes HTTP/HTTPS requests, and automatically blocks suspicious gambling-related content.
 
 ## Features
 
@@ -18,9 +18,7 @@ NetGuard is a Flask-based network monitoring application that uses machine learn
 - **Export Functionality**: Export traffic logs for analysis
 
 ### Supported Platforms
-- Windows (Primary support)
-- Linux (Basic support)
-- macOS (Basic support)
+- Windows
 
 ## Installation
 
@@ -189,9 +187,10 @@ This project is for educational and personal use. Please ensure compliance with 
 
 ## Disclaimer
 
-NetGuard is designed to help users monitor and control their network traffic. Users are responsible for:
+Jblocker is designed to help users monitor and control their network traffic. Users are responsible for:
 - Complying with local laws and regulations
 - Respecting privacy and terms of service
 - Using the tool responsibly and ethically
+
 
 The developers are not responsible for any misuse of this software.
